@@ -4,16 +4,27 @@
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.6.0" }
     },
-    "routes": [{
-        "src": "/(.*)",
-        "dest": "/api/index.php"
-    }],
+    "routes": [
+        {
+            "src": "/build/(.*)",
+            "dest": "/public/build/"
+        },
+        {
+            "src": "/resources/(.*)",
+            "dest": "/public/resources/"
+        },
+        {
+            "src": "/favicon/(.*)",
+            "dest": "/public/favicon/"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
     "env": {
-        "APP_ENV": "production",
-        "APP_DEBUG": "true",
-        "APP_URL": "https://task-manager-coding-test.vercel.app",
-        "APP_KEY": "APP_KEY=base64:TMHwnX+b0KD9tLZEH7934skoGTVa4YrPZMzdDLWy1Oo=",
-
+        "APP_NAME": "TaskManager",
+        "APP_DEBUG": "false",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
