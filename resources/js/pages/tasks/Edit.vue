@@ -16,7 +16,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeftIcon } from 'lucide-vue-next';
-import { toast } from 'sonner';
+import { toast } from 'vue-sonner';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -26,8 +26,11 @@ const props = defineProps<{
     user_id: number;
     name: string;
     email: string;
+    status?: string;
+    deadline?: string;
   };
-  users: { id: number; name: string; email: string }[];
+  users?: { id: number; name: string; email: string }[];
+  role: string;
 }>();
 
 const form = useForm({
@@ -35,24 +38,26 @@ const form = useForm({
   user_id: props.task.user_id.toString(),
   name: props.task.name,
   email: props.task.email,
+  status: props.task.status || 'pending',
+  deadline: props.task.deadline ?? '',
 });
 
 const selectedUser = computed(() =>
-  props.users.find((u) => u.id === parseInt(form.user_id)) || null
+  props.users?.find((u) => u.id === parseInt(form.user_id)) || null
 );
 
 const handleSubmit = () => {
-    if(selectedUser.value) {
+    if(props.role === 'admin' && selectedUser.value) {
         form.name = selectedUser.value.name;
         form.email = selectedUser.value.email;
     }
 
     form.put(`/tasks/${props.task.id}`, {
         onSuccess: () => {
-            toast.success('Task updated successfully!');
+            toast('Task updated successfully!');
         },
         onError: (error) => {
-            toast.error('Failed to update task.');
+            toast('Failed to update task.');
             console.error(error);
         },
     });
@@ -89,7 +94,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </CardHeader>
                 <CardContent>
                     <form @submit.prevent="handleSubmit" class="space-y-4">
-                        <div class="space-y-2">
+                        <div v-if="props.role === 'admin'" class="space-y-2">
                             <Label for="task_name">Task Name <span class="text-red-500">*</span></Label>
                             <Input
                             id="task_name"
@@ -100,7 +105,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <p v-if="form.errors.task_name" class="text-sm text-red-500">{{ form.errors.task_name }}</p>
                         </div>
 
-                        <div class="space-y-2">
+                        <div v-if="props.role === 'admin'" class="space-y-2">
                             <Label for="name">User<span class="text-red-500">*</span></Label>
                             <Select v-model="form.user_id">
                                 <SelectTrigger>
@@ -118,15 +123,48 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <p v-if="form.errors.user_id" class="text-sm text-red-500">{{ form.errors.user_id }}</p>
                             </div>
 
+                            <div class="space-y-2">
+                                <Label for="status">Status</Label>
+                                <Select v-model="form.status">
+                                    <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Task Status</SelectLabel>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="in_progress">In Progress</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <p v-if="form.errors.status" class="text-sm text-red-500">{{ form.errors.status }}</p>
+                            </div>
+
+                            <div v-if="props.role === 'admin'" class="space-y-2">
+                                <Label for="deadline">Deadline</Label>
+                                <Input
+                                    id="deadline"
+                                    v-model="form.deadline"
+                                    type="date"
+                                />
+                                <p v-if="form.errors.deadline" class="text-sm text-red-500">{{ form.errors.deadline }}</p>
+                            </div>
+
                             <div v-if="selectedUser">
                                 <Input type="hidden" :value="selectedUser.email" disabled />
                             </div>
 
-                        <div class="flex">
-                            <Button type="submit" :disabled="form.processing">
-                                {{ form.processing ? 'Updating...' : 'Update Task' }}
-                            </Button>
-                        </div>
+                            <div class="flex justify-between items-center">
+                                <Link :href="`/tasks`">
+                                    <Button variant="outline">
+                                        Cancel
+                                    </Button>
+                                </Link>
+                                <Button type="submit" :disabled="form.processing">
+                                    {{ form.processing ? 'Updating...' : 'Update Task' }}
+                                </Button>
+                            </div>
                     </form>
                 </CardContent>
             </Card>

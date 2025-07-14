@@ -21,6 +21,8 @@ class TaskFactory extends Factory
             'task_name' => fake()->sentence(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'status' => fake()->randomElement(['pending', 'in_progress', 'completed']),
+            'deadline' => fake()->dateTimeBetween('now', '+1 month'),
         ];
     }
 }

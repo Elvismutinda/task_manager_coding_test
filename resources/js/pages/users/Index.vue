@@ -27,72 +27,71 @@ import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
 
-type Task = {
+type User = {
     id: number;
-    task_name: string;
-    user_id: number;
     name: string;
     email: string;
-    status?: string;
-    deadline?: string;
 }
 
-const { tasks, role } = defineProps<{
-    tasks: Task[];
+const { users, role } = defineProps<{
+    users: User[];
     role: string;
 }>();
 
+const isAdmin = role === 'admin';
+
 const deleteDialogOpen = ref(false);
-const deleteTaskId = ref<number | null>(null);
+const deleteUserId = ref<number | null>(null);
 
 const handleDelete = (id: number) => {
-    deleteTaskId.value = id;
+    deleteUserId.value = id;
     deleteDialogOpen.value = true;
 };
 
 const handleConfirmDelete = () => {
-    if (deleteTaskId.value !== null) {
-    router.delete(`/tasks/${deleteTaskId.value}`, {
-      onSuccess: () => {
-        toast('Task deleted successfully!');
-      },
-      onError: () => {
-        toast('Failed to delete task.');
-      },
-      onFinish: () => {
-        deleteDialogOpen.value = false;
-        deleteTaskId.value = null;
-      },
-    });
-  }
+    if (deleteUserId.value !== null) {
+        // Assuming you have a method to delete the user
+        router.delete(`/users/${deleteUserId.value}`, {
+            onSuccess: () => {
+                toast('User deleted successfully!');
+            },
+            onError: () => {
+                toast('Failed to delete user.');
+            },
+            onFinish: () => {
+                deleteDialogOpen.value = false;
+                deleteUserId.value = null;
+            },
+        });
+    }
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Tasks',
-        href: '/tasks',
+        title: 'Users',
+        href: '/users',
     },
 ];
 </script>
 
 <template>
-    <Head title="Tasks" />
+    <Head title="Users" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold">Tasks</h1>
-                <Link v-if="role === 'admin'" :href="`/tasks/create`">
+                <h1 class="text-2xl font-bold">Users</h1>
+                <Link v-if="isAdmin" :href="`/users/create`">
                     <Button>
                         <PlusIcon class="h-4 w-4" />
-                        Create Task
+                        Add User
                     </Button>
                 </Link>
             </div>
             <div class="flex flex-col gap-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>All Tasks</CardTitle>
+                        <CardTitle>All Users</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="flex flex-col gap-4">
@@ -100,31 +99,25 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead class="w-[100px]">#</TableHead>
-                                        <TableHead>Task</TableHead>
-                                        <TableHead>Assigned to</TableHead>
+                                        <TableHead>Name</TableHead>
                                         <TableHead>Email</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Deadline</TableHead>
-                                        <TableHead>Action</TableHead>
+                                        <TableHead v-if="isAdmin">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    <TableRow v-for="task in tasks" :key="task.id">
-                                        <TableCell class="font-medium">#{{ task.id  }}</TableCell>
-                                        <TableCell>{{ task.task_name }}</TableCell>
-                                        <TableCell>{{ task.name }}</TableCell>
-                                        <TableCell>{{ task.email }}</TableCell>
-                                        <TableCell>{{ task.status ? task.status.replace('_', ' ') : '—' }}</TableCell>
-                                        <TableCell>{{ task.deadline ?? '—' }}</TableCell>
-                                        <TableCell>
+                                    <TableRow v-for="user in users" :key="user.id">
+                                        <TableCell class="font-medium">#{{ user.id  }}</TableCell>
+                                        <TableCell>{{ user.name }}</TableCell>
+                                        <TableCell>{{ user.email }}</TableCell>
+                                        <TableCell v-if="isAdmin">
                                             <div class="flex items-center space-x-2">
-                                                <Link v-if="role === 'admin' || task.user_id === $page.props.auth.user.id" :href="`/tasks/${task.id}/edit`">
+                                                <Link :href="`/users/${user.id}/edit`">
                                                     <Button variant="outline">
                                                         <EditIcon class="h-4 w-4" />
                                                     </Button>
                                                 </Link>
 
-                                                <Button v-if="role === 'admin'" variant="destructive" @click="() => handleDelete(task.id)">
+                                                <Button variant="destructive" @click="() => handleDelete(user.id)">
                                                     <TrashIcon class="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -136,12 +129,12 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </CardContent>
                 </Card>
             </div>
-            <AlertDialog :open="deleteDialogOpen" @update:open="(val: boolean) => deleteDialogOpen = val">
+            <AlertDialog v-if="isAdmin" :open="deleteDialogOpen" @update:open="(val: boolean) => deleteDialogOpen = val">
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure you want to delete this task?</AlertDialogTitle>
+                        <AlertDialogTitle>Are you sure you want to delete this user?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete this task.
+                            This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

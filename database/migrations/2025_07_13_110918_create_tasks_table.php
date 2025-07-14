@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('task_name');
             $table->string('name');
             $table->string('email')->nullable();
+            $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
+            $table->date('deadline')->nullable();
             $table->timestamps();
         });
     }

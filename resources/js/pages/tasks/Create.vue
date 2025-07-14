@@ -16,19 +16,20 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeftIcon } from 'lucide-vue-next';
-import { toast } from 'sonner';
+import { toast } from 'vue-sonner';
 import { computed } from 'vue';
 
 const props = defineProps<{
   users: { id: number; name: string; email: string}[];
 }>();
 
-// Reactive form state
 const form = useForm({
   task_name: '',
   user_id: '',
   name: '',
   email: '',
+  status: 'pending',
+  deadline: '',
 });
 
 const selectedUser = computed(() =>
@@ -43,10 +44,10 @@ const handleSubmit = () => {
 
     form.post('/tasks', {
         onSuccess: () => {
-            toast.success('Task created successfully!');
+            toast('Task created successfully!');
         },
         onError: (error) => {
-            toast.error('Failed to create task. Please check the form.');
+            toast('Failed to create task. Please check the form.');
             console.error(error);
         },
     });
@@ -112,11 +113,26 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <p v-if="form.errors.user_id" class="text-sm text-red-500">{{ form.errors.user_id }}</p>
                             </div>
 
+                            <div class="space-y-2">
+                                <Label for="deadline">Deadline</Label>
+                                <Input
+                                    id="deadline"
+                                    v-model="form.deadline"
+                                    type="date"
+                                />
+                                <p v-if="form.errors.deadline" class="text-sm text-red-500">{{ form.errors.deadline }}</p>
+                            </div>
+
                             <div v-if="selectedUser">
                                 <Input type="hidden" :value="selectedUser.email" disabled />
                             </div>
 
-                        <div class="flex">
+                        <div class="flex justify-between items-center">
+                            <Link :href="`/tasks`">
+                                <Button variant="outline">
+                                    Cancel
+                                </Button>
+                            </Link>
                             <Button type="submit" :disabled="form.processing">
                                 {{ form.processing ? 'Creating...' : 'Create Task' }}
                             </Button>
