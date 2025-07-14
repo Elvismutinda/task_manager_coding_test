@@ -2,6 +2,7 @@
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -84,10 +85,24 @@ const submit = () => {
                 </Button>
             </div>
 
-            <div class="text-center text-sm text-muted-foreground">
-                Don't have an account?
-                <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
-            </div>
+            <Card class="mt-6 w-full max-w-md mx-auto text-left text-sm">
+                <CardHeader>
+                    <CardTitle>Test Credentials</CardTitle>
+                    <CardDescription>Use the following accounts to log in:</CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-2">
+                    <div>
+                    <p><strong>Admin</strong></p>
+                    <p>Email: <code>admin@gmail.com</code></p>
+                    <p>Password: <code>password</code></p>
+                    </div>
+                    <div>
+                    <p><strong>User</strong></p>
+                    <p>Email: <code>elvocool@gmail.com</code></p>
+                    <p>Password: <code>password</code></p>
+                    </div>
+                </CardContent>
+            </Card>
         </form>
     </AuthBase>
 </template>
