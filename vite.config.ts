@@ -23,8 +23,10 @@ export default defineConfig({
     ],
     build: {
         outDir: 'public/build',
-        emptyOutDir: true,
         manifest: true,
+        rollupOptions: {
+            input: ['resources/js/app.ts'],
+        },
     },
     resolve: {
         alias: {
